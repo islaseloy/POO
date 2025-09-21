@@ -1,10 +1,21 @@
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+import vistas.VistaMenu;
+import vistas.VistaUsuario;
+
+import javax.swing.*;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.printf("Hello and welcome!");
-        for (int i = 1; i <= 5; i++) {
-            System.out.println("i = " + i);
+        try {
+            /*
+            * UIManager permite elegir un estilo para Swing que aplica a toda la aplicación
+            * ahorrándonos el diseño, lo cual está muy bien
+            * */
+            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+        } catch (Exception e) {
+            System.out.println("Error al establecer el Look and Feel: " + e);
         }
+
+        VistaMenu vistaMenu = new VistaMenu();
+        vistaMenu.setVisible(true);
     }
 }

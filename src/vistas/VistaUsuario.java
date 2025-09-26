@@ -9,7 +9,7 @@ public class VistaUsuario extends JFrame{
     private JLabel labelName;
     private JTextField textFieldName;
     private JTextField textFieldEmail;
-    private JPasswordField passwordField;
+    private JPasswordField passwordField;//podria no ir
     private JTextField textFieldDate;
     private JList listHabitos;
     private JButton btnGuardar;

@@ -8,7 +8,7 @@ public class VistaProgreso extends JFrame {
 
     //No debería hacer falta tener ID en la vista pero lo dejamos porque es un atributo, habría que removerlo más adelante
     private JTextField textFieldID;
-    //Todos los hábitos llenan el combo box y de ahí el usuario selecciona el que quiera registrar
+    //Todos los hábitos llenan el combo box y de ahi el usuario selecciona el que quiera registrar
     private JComboBox comboBoxHabito;
     // Revisar si hay algo mejor para las fechas que un JTextField
     private JTextField textFieldFechaReg;

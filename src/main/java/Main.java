@@ -1,5 +1,4 @@
 import vistas.VistaMenu;
-import vistas.VistaUsuario;
 
 import javax.swing.*;
 

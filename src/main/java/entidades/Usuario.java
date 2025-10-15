@@ -32,6 +32,10 @@ public class Usuario {
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaRegistro;
 
+    //Todos los usuarios van a tener una List<Habito> más adelante, pero por ahora queda como String
+    @Column(length = 1024)
+    private String habitos;
+
     // CONSTRUCTORES
     //El buen constructor vacío, nunca falla
     public Usuario() {
@@ -39,10 +43,11 @@ public class Usuario {
     }
 
     //El constructor con los atributos
-    public Usuario(String nombreDeUsuario, String email, String contrasena, Date fechaRegistro) {
+    public Usuario(String nombreDeUsuario, String email, String contrasena, String habitos, Date fechaRegistro) {
         this.nombreDeUsuario = nombreDeUsuario;
         this.email = email;
         this.contrasena = contrasena;
+        this.habitos = habitos;
         this.fechaRegistro = fechaRegistro;
     }
 
@@ -86,6 +91,14 @@ public class Usuario {
 
     public void setFechaRegistro(Date fechaRegistro) {
         this.fechaRegistro = fechaRegistro;
+    }
+
+    public String getHabitos() {
+        return habitos;
+    }
+
+    public void setHabitos(String habitos) {
+        this.habitos = habitos;
     }
 
     @Override

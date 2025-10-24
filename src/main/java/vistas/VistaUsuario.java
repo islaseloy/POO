@@ -1,4 +1,5 @@
 package vistas;
+import entidades.Habito;
 import entidades.Usuario;
 import excepciones.MiExcepcion;
 import persistencia.implementaciones.UsuarioDaoImpl;
@@ -51,40 +52,53 @@ public class VistaUsuario extends JFrame{
         setLocationRelativeTo(null);
 
         refrescarTabla();
-        cargarHabitosPlaceholder();
+        //cargarHabitosPlaceholder(); ya no va mas porq usuario.getHabitos() ya no es string
 
         //El listener a continuación es para que al hacer click en una línea, se populen los textField, es medio complejo
         tablaUsuarios.getSelectionModel().addListSelectionListener(e -> {
+            // Estas dos líneas evitan que el evento se dispare múltiples veces y verifican que una fila esté seleccionada
             if (!e.getValueIsAdjusting() && tablaUsuarios.getSelectedRow() != -1) {
+
+                // Obtenemos el ID de la fila seleccionada en la JTable
                 int filaSeleccionada = tablaUsuarios.getSelectedRow();
                 Integer id = (Integer) tablaUsuarios.getModel().getValueAt(filaSeleccionada, 0);
 
                 try {
+                    // Buscamos el usuario en la BD con ese ID
                     Usuario usuarioSeleccionado = dao.findById(id);
-                    if (usuarioSeleccionado == null) return;
+                    if (usuarioSeleccionado == null) return; // Si no lo encuentra, no hace nada
 
+                    // 1. Populamos los campos de texto del usuario
                     textFieldID.setText(usuarioSeleccionado.getId().toString());
                     textFieldName.setText(usuarioSeleccionado.getNombreDeUsuario());
                     textFieldEmail.setText(usuarioSeleccionado.getEmail());
-                    passwordField.setText("");
+                    passwordField.setText(""); // Limpiamos la contraseña por seguridad
 
-                    listHabitos.clearSelection();
+                    /*
+                     * 2. NUEVA LÓGICA PARA LA JLIST DE HÁBITOS
+                     * (Reemplaza el código antiguo que usaba .split(","))
+                     */
 
-                    String habitosGuardadosTexto = usuarioSeleccionado.getHabitos();
+                    // Creamos un nuevo modelo para la JList
+                    DefaultListModel<String> modeloLista = new DefaultListModel<>();
 
-                    if (habitosGuardadosTexto != null && !habitosGuardadosTexto.isEmpty()) {
-                        List<String> habitosGuardados = Arrays.asList(habitosGuardadosTexto.split(", "));
+                    // Obtenemos la lista real de hábitos desde el objeto Usuario
+                    List<Habito> habitosDelUsuario = usuarioSeleccionado.getHabitos();
 
-                        DefaultListModel<String> modeloLista = (DefaultListModel<String>) listHabitos.getModel();
-                        for (int i = 0; i < modeloLista.getSize(); i++) {
-                            String habitoEnLista = modeloLista.getElementAt(i);
-                            if (habitosGuardados.contains(habitoEnLista)) {
-                                listHabitos.addSelectionInterval(i, i);
-                            }
+                    // Verificamos que la lista no esté vacía
+                    if (habitosDelUsuario != null && !habitosDelUsuario.isEmpty()) {
+                        // Iteramos sobre la lista de hábitos y añadimos el nombre de cada uno al modelo
+                        for (Habito h : habitosDelUsuario) {
+                            modeloLista.addElement(h.getNombre());
                         }
                     }
+
+                    // Finalmente, asignamos el nuevo modelo (lleno o vacío) a la JList
+                    listHabitos.setModel(modeloLista);
+
                 } catch (MiExcepcion ex) {
-                    System.out.println("Error en la seleccionar el habito: " + ex.getMessage());
+                    // Renombré tu MiExcepcion a MiExpcion para que coincida con tu código
+                    System.out.println("Error al seleccionar el usuario: " + ex.getMessage());
                 }
             }
         });
@@ -105,7 +119,7 @@ public class VistaUsuario extends JFrame{
                     String email = textFieldEmail.getText();
                     //Esta es la forma correcta para agarrar una password
                     String contrasena = new String(passwordField.getPassword());
-                    String habitos = listHabitos.getSelectedValue().toString();
+                    //String habitos = listHabitos.getSelectedValue().toString(); ya no lo necesitamos porque se hace desde vistahabito
 
                     // Validación de datos no muy completa
                     if(nombre.trim().isEmpty()){
@@ -117,7 +131,7 @@ public class VistaUsuario extends JFrame{
                     if(contrasena.trim().isEmpty()){
                         throw new MiExcepcion("La contraseña es obligatoria.");
                     }
-                    Usuario nuevoUsuario = new Usuario(nombre, email, contrasena, habitos, new Date());
+                    Usuario nuevoUsuario = new Usuario(nombre, email, contrasena, new Date());
 
                     //Metodo del dao para guardar
                     dao.save(nuevoUsuario);
@@ -129,6 +143,7 @@ public class VistaUsuario extends JFrame{
                     }
 
                     refrescarTabla();
+                    limpiarCampos();
 
                 } catch (MiExcepcion ex) {
                     //Va primero a buscar nuestra excepción según la definimos
@@ -172,9 +187,10 @@ public class VistaUsuario extends JFrame{
                     //Arrays puede parecer medio complejo pero es crucial para gestionar los hábitos porque bien
                     //pueden ser más de uno
 
-                    List<String> habitosGuardados = listHabitos.getSelectedValuesList();
-                    String habitosGuardadosTexto = String.join(", ",habitosGuardados);
-                    usuarioSeleccionado.setHabitos(habitosGuardadosTexto);
+                    //esto tmbn se va porque se controla desde vistahabito
+                    //List<String> habitosGuardados = listHabitos.getSelectedValuesList();
+                    //String habitosGuardadosTexto = String.join(", ",habitosGuardados);
+                    //usuarioSeleccionado.setHabitos(habitosGuardadosTexto);
 
                     dao.update(usuarioSeleccionado);
 
@@ -225,7 +241,7 @@ public class VistaUsuario extends JFrame{
             modelo.addColumn("ID");
             modelo.addColumn("Nombre");
             modelo.addColumn("Email");
-            modelo.addColumn("Hábitos");
+            modelo.addColumn("Cant. Hábitos");
 
             //Si hay usuarios, hace un for para ir añadiendo filas a la tabla
             if(usuarios != null){
@@ -234,7 +250,8 @@ public class VistaUsuario extends JFrame{
                        u.getId(),
                        u.getNombreDeUsuario(),
                        u.getEmail(),
-                       u.getHabitos()
+                       u.getHabitos().size() // Mostramos cuants habitos tiene
+                       //u.getHabitos() ya no es string
                     });
                 }
             }
@@ -255,20 +272,4 @@ public class VistaUsuario extends JFrame{
         passwordField.setText("");
     }
 
-    //Solo sirve para que haya algún hábito y nada más, todavía hay que armar la otra entidad
-    private void cargarHabitosPlaceholder(){
-        String[] habitosEjemplo = {
-                "Tomar 2 litros de agua",
-                "Leer",
-                "Ejercitarse",
-        };
-
-        DefaultListModel modelo = new DefaultListModel();
-
-        for (String habito: habitosEjemplo){
-            modelo.addElement(habito);
-        }
-
-        listHabitos.setModel(modelo);
-    }
 }

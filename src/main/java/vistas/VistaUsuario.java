@@ -9,7 +9,6 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -31,6 +30,7 @@ public class VistaUsuario extends JFrame{
     private JButton eliminarButton;
     private JButton nuevoButton;
     private JTable tablaUsuarios;
+    private JButton gestionarHabitosButton;
     private VistaMenu vistaMenuPadre;
     private UsuarioDao dao;
 
@@ -44,7 +44,7 @@ public class VistaUsuario extends JFrame{
         this.vistaMenuPadre = vistaMenuPadre;
         this.dao = UsuarioDaoImpl.getInstance();
 
-        setTitle("Progreso");
+        setTitle("Gestión de Usuarios");
         setContentPane(panel1);
         //HIDE ON CLOSE para que no nos cierre toda la app
         setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
@@ -54,10 +54,15 @@ public class VistaUsuario extends JFrame{
         refrescarTabla();
         //cargarHabitosPlaceholder(); ya no va mas porq usuario.getHabitos() ya no es string
 
+        // INICIALIZACIÓN DE BOTONES
+        gestionarHabitosButton.setEnabled(false); // Deshabilitado por defecto
+
         //El listener a continuación es para que al hacer click en una línea, se populen los textField, es medio complejo
         tablaUsuarios.getSelectionModel().addListSelectionListener(e -> {
             // Estas dos líneas evitan que el evento se dispare múltiples veces y verifican que una fila esté seleccionada
             if (!e.getValueIsAdjusting() && tablaUsuarios.getSelectedRow() != -1) {
+                // HABILITA el btn cuando se selecciona una fila
+                gestionarHabitosButton.setEnabled(true);
 
                 // Obtenemos el ID de la fila seleccionada en la JTable
                 int filaSeleccionada = tablaUsuarios.getSelectedRow();
@@ -108,6 +113,24 @@ public class VistaUsuario extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 VistaUsuario.this.setVisible(false);
                 vistaMenuPadre.setVisible(true);
+            }
+        });
+
+        gestionarHabitosButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    Integer idUsuario = Integer.parseInt(textFieldID.getText());
+                    Usuario usuario = dao.findById(idUsuario);
+                    if (usuario != null) {
+                        // 1. Le dice al padre que abra la otra vista
+                        vistaMenuPadre.abrirHabitosParaUsuario(usuario);
+                        // 2. Cierra esta vista
+                        VistaUsuario.this.setVisible(false);
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "Error al seleccionar usuario: " + ex.getMessage());
+                }
             }
         });
 
@@ -270,6 +293,9 @@ public class VistaUsuario extends JFrame{
         textFieldName.setText("");
         textFieldEmail.setText("");
         passwordField.setText("");
+        listHabitos.setModel(new DefaultListModel<>()); // Limpia la lista de hábitos
+        tablaUsuarios.clearSelection(); // Deselecciona la tabla
+        gestionarHabitosButton.setEnabled(false); // ¡Importante! Deshabilita el botón
     }
 
 }

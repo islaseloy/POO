@@ -9,6 +9,7 @@
         <!-- Acá vamos colocándoles las clases que después se convierten en tablas -->
         <class>entidades.Usuario</class>
         <class>entidades.Habito</class>
+        <class>entidades.Progreso</class>
 
         <properties>
             <property name="javax.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>

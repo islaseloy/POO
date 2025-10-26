@@ -3,6 +3,8 @@ package entidades;
 import javax.persistence.*;
 import java.util.Date;
 import java.util.Objects;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "habitos")
@@ -13,7 +15,6 @@ public class Habito {
 
     @Column(nullable = false)
     private String nombre;
-
     private String descripcion;
     private String tipo;
     private String frecuencia;
@@ -34,6 +35,10 @@ public class Habito {
     @JoinColumn(name = "usuario_id", nullable = false) // Un hábito DEBE tener un usuario
     private Usuario usuario;
 
+
+    //Un Hábito tiene Muchos Progresos.
+    @OneToMany(mappedBy = "habito", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Progreso> progresos = new ArrayList<>();
     //Constructores
     public Habito() {
     }
@@ -58,6 +63,14 @@ public class Habito {
 
     public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
+    }
+
+    public List<Progreso> getProgresos() {
+        return progresos;
+    }
+
+    public void setProgresos(List<Progreso> progresos) {
+        this.progresos = progresos;
     }
 
     public Integer getId() {
@@ -132,7 +145,30 @@ public class Habito {
         this.fechaInicio = fechaInicio;
     }
 
+    /*
+     * MÉTODOS HELPER
+     */
+    public void addProgreso(Progreso progreso) {
+        this.progresos.add(progreso);
+        progreso.setHabito(this);
+    }
+    public void removeProgreso(Progreso progreso) {
+        this.progresos.remove(progreso);
+        progreso.setHabito(null);
+    }
 
+    /*
+     * Esto es VITAL para el JComboBox de VistaProgreso.
+     * Ahora mostrará "Leer (Usuario: agusp)" en lugar de solo "Leer".
+     */
+    @Override
+    public String toString() {
+        if (this.usuario != null) {
+            return this.nombre + " (" + this.usuario.getNombreDeUsuario() + ")";
+        } else {
+            return this.nombre;
+        }
+    }
 
     // equals() y hashCode()
     // basados solo en el ID

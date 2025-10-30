@@ -18,3 +18,9 @@ La estructura de vistas propuesta es:
 - Vista Tracking
 
 *Suficiente, o falta algo? Lo sabremos con el tiempo.*
+
+**NUEVAS COSAS:**
+
+Maven añadido al proyecto para que sea más fácil el usar dependencias ajenas
+
+Documentación: https://www.jetbrains.com/help/idea/convert-a-regular-project-into-a-maven-project.html

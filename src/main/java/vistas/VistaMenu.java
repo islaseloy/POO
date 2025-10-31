@@ -50,19 +50,5 @@ public class VistaMenu extends JFrame {
         });
     }
 
-        /**
-         * Este método es llamado por VistaUsuario para abrir la
-         * ventana de hábitos en "modo filtrado".
-         * @param usuario El usuario seleccionado en VistaUsuario.
-         */
-        public void abrirHabitosParaUsuario(Usuario usuario) {
-            // 1. Llama al método especial de vistaHabito
-            vistaHabito.mostrarHabitosDe(usuario);
 
-            // 2. Muestra la vista de hábitos
-            vistaHabito.setVisible(true);
-
-            // 3. Oculta el menú (o la vista de usuario, que ya se ocultó)
-            this.setVisible(false);
-        }
     }

@@ -1,7 +1,8 @@
 package persistencia.interfaces;
 
 import entidades.Habito;
+import excepciones.MiExcepcion;
 
 public interface HabitoDao extends Dao<Habito> {
-    //por ahora vacio tmbn
+    Habito getByName(String name) throws MiExcepcion;
 }

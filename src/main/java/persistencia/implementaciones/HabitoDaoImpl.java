@@ -6,6 +6,7 @@ import persistencia.interfaces.HabitoDao;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.NoResultException;
 import javax.persistence.Persistence;
 import java.util.List;
 
@@ -23,6 +24,20 @@ public class HabitoDaoImpl implements HabitoDao {
             instance = new HabitoDaoImpl();
         }
         return instance;
+    }
+
+    @Override
+    public Habito getByName(String name) throws MiExcepcion {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.createQuery("SELECT h FROM Habito h WHERE h.nombre = :name", Habito.class)
+                    .setParameter("name", name)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        } finally {
+            em.close();
+        }
     }
 
     @Override
@@ -56,8 +71,9 @@ public class HabitoDaoImpl implements HabitoDao {
             em.getTransaction().begin();
             Habito habito = em.find(Habito.class, Id);
             if (habito != null) {
-                // Importante: Romper la relación antes de borrar
-                habito.getUsuario().removeHabito(habito);
+                em.createQuery("DELETE FROM HabitoPersonalizado hp WHERE hp.habitoBase.id = :habitoId")
+                        .setParameter("habitoId", Id)
+                        .executeUpdate();
                 em.remove(habito);
             }
             em.getTransaction().commit();

@@ -17,23 +17,18 @@ public class Progreso {
     private Date fechaRegistro;
 
     @Column(nullable = false)
-    private String estado; // Ej: "Completado", "No Completado"
+    private String estado;
 
-    @Column(length = 1024) // Columna más grande para observaciones
+    @Column(length = 1024)
     private String observaciones;
 
     @Column(nullable = false)
-    private Double logro; // El valor numérico. Ej: 2 (de 2 litros de agua)
+    private Double logro;
 
-    /*
-     * RELACIÓN CLAVE (Lado "Muchos"):
-     * Muchos registros de Progreso pertenecen a Un Hábito.
-     */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "habito_id", nullable = false)
-    private Habito habito;
+    @JoinColumn(name = "habito_personalizado_id", nullable = false)
+    private HabitoPersonalizado habitoPersonalizado;
 
-    // Constructores
     public Progreso() {
     }
 
@@ -42,10 +37,8 @@ public class Progreso {
         this.estado = estado;
         this.observaciones = observaciones;
         this.logro = logro;
-        this.habito = habito;
     }
 
-    // Getters y Setters
 
     public Integer getId() {
         return id;
@@ -87,15 +80,9 @@ public class Progreso {
         this.logro = logro;
     }
 
-    public Habito getHabito() {
-        return habito;
-    }
+    public HabitoPersonalizado getHabitoPersonalizado() { return habitoPersonalizado; }
 
-    public void setHabito(Habito habito) {
-        this.habito = habito;
-    }
-
-    // Equals y HashCode (basados en ID)
+    public void setHabitoPersonalizado(HabitoPersonalizado habitoPersonalizado) { this.habitoPersonalizado = habitoPersonalizado; }
 
     @Override
     public boolean equals(Object o) {

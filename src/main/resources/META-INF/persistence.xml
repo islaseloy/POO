@@ -10,12 +10,13 @@
         <class>entidades.Usuario</class>
         <class>entidades.Habito</class>
         <class>entidades.Progreso</class>
+        <class>entidades.HabitoPersonalizado</class>
 
         <properties>
             <property name="javax.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
             <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/gestor_habitos_db?useSSL=false&amp;serverTimezone=UTC"/>
             <property name="javax.persistence.jdbc.user" value="root"/>
-            <property name="javax.persistence.jdbc.password" value=""/>
+            <property name="javax.persistence.jdbc.password" value="root"/>
 
             <!-- Esto le indica al JPA qué hacer con las tablas la primera vez que se conecte-->
             <property name="javax.persistence.schema-generation.database.action" value="create"/>

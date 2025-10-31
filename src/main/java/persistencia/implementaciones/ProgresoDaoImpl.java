@@ -56,8 +56,6 @@ public class ProgresoDaoImpl implements ProgresoDao {
             em.getTransaction().begin();
             Progreso progreso = em.find(Progreso.class, Id);
             if (progreso != null) {
-                // Rompemos la relación en la entidad padre (Hábito)
-                progreso.getHabito().removeProgreso(progreso);
                 em.remove(progreso);
             }
             em.getTransaction().commit();

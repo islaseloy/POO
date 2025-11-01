@@ -1,5 +1,6 @@
 package persistencia.implementaciones;
 
+import entidades.Habito;
 import entidades.HabitoPersonalizado;
 import entidades.Usuario;
 import excepciones.MiExcepcion;
@@ -36,6 +37,48 @@ public class HabitoPersonalizadoDaoImpl implements HabitoPersonalizadoDao {
                     )
                     .setParameter("usuarioId", usuario.getId())
                     .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public boolean existe(Usuario u, Habito h, Double meta) throws MiExcepcion {
+        EntityManager em = emf.createEntityManager();
+        try {
+            Long count = em.createQuery(
+                            "SELECT COUNT(hp) FROM HabitoPersonalizado hp " +
+                                    "WHERE hp.usuario = :usuario " +
+                                    "AND hp.habitoBase = :habitoBase " +
+                                    "AND hp.meta = :meta", Long.class)
+                    .setParameter("usuario", u)
+                    .setParameter("habitoBase", h)
+                    .setParameter("meta", meta)
+                    .getSingleResult();
+
+            return count > 0;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public boolean existeOtro(Usuario u, Habito h, Double meta, Integer idActual) throws MiExcepcion {
+        EntityManager em = emf.createEntityManager();
+        try {
+            Long count = em.createQuery(
+                            "SELECT COUNT(hp) FROM HabitoPersonalizado hp " +
+                                    "WHERE hp.usuario = :usuario " +
+                                    "AND hp.habitoBase = :habitoBase " +
+                                    "AND hp.meta = :meta " +
+                                    "AND hp.id <> :idActual", Long.class)
+                    .setParameter("usuario", u)
+                    .setParameter("habitoBase", h)
+                    .setParameter("meta", meta)
+                    .setParameter("idActual", idActual)
+                    .getSingleResult();
+
+            return count > 0;
         } finally {
             em.close();
         }

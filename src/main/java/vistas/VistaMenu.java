@@ -31,6 +31,7 @@ public class VistaMenu extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 VistaMenu.this.setVisible(false);
+                vistaHabito.refrescarDatos();
                 vistaHabito.setVisible(true);
             }
         });
@@ -38,6 +39,7 @@ public class VistaMenu extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 VistaMenu.this.setVisible(false);
+                vistaProgreso.refrescarDatos();
                 vistaProgreso.setVisible(true);
             }
         });
@@ -45,6 +47,7 @@ public class VistaMenu extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 VistaMenu.this.setVisible(false);
+                vistaUsuario.refrescarDatos();
                 vistaUsuario.setVisible(true);
             }
         });

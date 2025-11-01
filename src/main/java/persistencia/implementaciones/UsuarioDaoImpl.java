@@ -78,7 +78,14 @@ public class UsuarioDaoImpl implements UsuarioDao {
     public List<Usuario> findAll() throws MiExcepcion {
         EntityManager em = emf.createEntityManager();
         try{
-            return em.createQuery("SELECT u FROM Usuario u", Usuario.class).getResultList();
+            List<Usuario> usuarios = em.createQuery("SELECT u FROM Usuario u", Usuario.class).getResultList();
+            // Forzamos a JPA a refrescar cada usuario desde la BD.
+            // Esto actualizará sus colecciones internas
+            for (Usuario u : usuarios) {
+                em.refresh(u);
+            }
+            return usuarios;
+
         } finally {
             em.close();
         }

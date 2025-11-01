@@ -219,6 +219,9 @@ public class VistaHabito extends JFrame {
             textFieldFecha.setText("");
         }
     }
+    public void refrescarDatos() {
+        controller.cargarDatosIniciales();
+    }
 
     public void setUsuarioAsociado(Usuario usuario) {
         comboBoxUsuario.setSelectedItem(usuario);

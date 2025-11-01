@@ -3,10 +3,12 @@ package vistas;
 import controladores.ProgresoController;
 import entidades.HabitoPersonalizado;
 import entidades.Usuario;
-import persistencia.implementaciones.HabitoDaoImpl;
-import persistencia.implementaciones.ProgresoDaoImpl;
-import persistencia.interfaces.HabitoDao;
-import persistencia.interfaces.ProgresoDao;
+import entidades.Progreso;
+//entiendo que los dao ya no se necesitan en esta vista
+//import persistencia.implementaciones.HabitoDaoImpl;
+//import persistencia.implementaciones.ProgresoDaoImpl;
+//import persistencia.interfaces.HabitoDao;
+//import persistencia.interfaces.ProgresoDao;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -42,15 +44,16 @@ public class VistaProgreso extends JFrame {
     private JComboBox<Usuario> comboBoxUsuario;
 
     private VistaMenu vistaMenuPadre;
-    private HabitoDao habitoDao;
-    private ProgresoDao progresoDao;
+    //private HabitoDao habitoDao;
+    //private ProgresoDao progresoDao;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
     private final ProgresoController controller;
 
     public VistaProgreso(VistaMenu vistaMenuPadre) {
         this.vistaMenuPadre = vistaMenuPadre;
-        this.habitoDao = HabitoDaoImpl.getInstance();
-        this.progresoDao = ProgresoDaoImpl.getInstance();
+        //this.habitoDao = HabitoDaoImpl.getInstance();
+        //this.progresoDao = ProgresoDaoImpl.getInstance();
+        //la vista ahora se maneja por el controller
         this.controller = new ProgresoController(this);
 
 
@@ -76,12 +79,22 @@ public class VistaProgreso extends JFrame {
         });
 
         guardarButton.addActionListener(e -> controller.guardarProgreso());
+        editarButton.addActionListener(e -> controller.editarProgreso());
+        eliminarButton.addActionListener(e -> controller.eliminarProgreso());
+        cancelarButton.addActionListener(e -> limpiarFormulario());
 
         buttonVolver.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 VistaProgreso.this.setVisible(false);
                 vistaMenuPadre.setVisible(true);
+            }
+        });
+
+        tablaProgresos.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting() && tablaProgresos.getSelectedRow() != -1) {
+                // Cuando se selecciona una fila, le avisamos al controlador
+                controller.progresoSeleccionado();
             }
         });
     }
@@ -122,16 +135,16 @@ public class VistaProgreso extends JFrame {
         JOptionPane.showMessageDialog(this, mensaje, titulo, tipoMensaje);
     }
 
-    public Usuario getUsuarioSeleccionado() {
-        return (Usuario) comboBoxUsuario.getSelectedItem();
-    }
-
     public void habilitarComboHabitos(boolean habilitar) {
         comboBoxHabito.setEnabled(habilitar);
     }
 
     public HabitoPersonalizado getHabitoPersonalizadoSeleccionado() {
         return (HabitoPersonalizado) comboBoxHabito.getSelectedItem();
+    }
+
+    public Usuario getUsuarioSeleccionado() {
+        return (Usuario) comboBoxUsuario.getSelectedItem();
     }
 
     public String getFechaRegistro() {
@@ -150,6 +163,36 @@ public class VistaProgreso extends JFrame {
         return textFieldLogro.getText();
     }
 
+    public Integer getIdProgreso() {
+        try {
+            return Integer.parseInt(textFieldID.getText());
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    public void setFormulario(Progreso p) {
+        textFieldID.setText(p.getId().toString());
+        textFieldFechaReg.setText(dateFormat.format(p.getFechaRegistro()));
+        textFieldLogro.setText(p.getLogro().toString());
+        textAreaObserv.setText(p.getObservaciones());
+        comboBoxEstado.setSelectedItem(p.getEstado());
+
+        // Selecciona el usuario y luego el hábito (para asegurar que el combo de hábito tenga info)
+        comboBoxUsuario.setSelectedItem(p.getHabitoPersonalizado().getUsuario());
+        comboBoxHabito.setSelectedItem(p.getHabitoPersonalizado());
+    }
+    public void refrescarDatos() {
+        controller.cargarDatosIniciales();
+    }
+
     public void limpiarFormulario() {
+        textFieldID.setText("");
+        textFieldFechaReg.setText("");
+        textAreaObserv.setText("");
+        textFieldLogro.setText("");
+        comboBoxEstado.setSelectedIndex(0);
+        comboBoxUsuario.setSelectedIndex(0); //dispara el listener y limpiará/deshabilitará el combo de hábitos
+        tablaProgresos.clearSelection();
     }
 }

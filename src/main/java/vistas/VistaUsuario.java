@@ -127,6 +127,10 @@ public class VistaUsuario extends JFrame{
     public void mostrarMensaje(String mensaje, String titulo, int tipoMensaje) {
         JOptionPane.showMessageDialog(this, mensaje, titulo, tipoMensaje);
     }
+    public void refrescarDatos() {
+        // Llama al método del controlador que ya sabe cómo recargar la tabla
+        controller.refrescarTabla();
+    }
 
     public String getIdUsuario() {
         return textFieldID.getText();

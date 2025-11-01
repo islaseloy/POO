@@ -59,6 +59,7 @@ public class HabitoController {
             vista.setUnidad(habitoP.getUnidad());
             vista.setFechaInicio(habitoP.getFechaInicio());
 
+
             if (habitoP.getHabitoBase() != null) {
                 vista.setNombreHabitoCatalogo(habitoP.getHabitoBase());
                 vista.setDescripcion(habitoP.getHabitoBase().getDescripcion());
@@ -163,6 +164,11 @@ public class HabitoController {
                 throw new MiExcepcion("El formato de 'Fecha de Inicio' es incorrecto. Por favor, use dd-MM-yyyy.");
             }
 
+            if (habitoPersonalizadoDao.existe(usuario, habitoBase, meta)) {
+                throw new MiExcepcion("Este usuario ya tiene el hábito '" + habitoBase.getNombre() +
+                        "' registrado con la meta " + meta + " " + unidad + ".");
+            }
+
             HabitoPersonalizado nuevoHabitoP = new HabitoPersonalizado();
             nuevoHabitoP.setFrecuencia(frecuencia);
             nuevoHabitoP.setHorario(horario);
@@ -222,6 +228,13 @@ public class HabitoController {
                 fechaInicio = new SimpleDateFormat("dd-MM-yyyy").parse(fechaStr);
             } catch (ParseException e) {
                 throw new MiExcepcion("El formato de 'Fecha de Inicio' es incorrecto. Use dd-MM-yyyy.");
+            }
+
+            Usuario usuario = habitoP.getUsuario();
+            Habito habitoBase = habitoP.getHabitoBase();
+            if (habitoPersonalizadoDao.existeOtro(usuario, habitoBase, meta, id)) {
+                throw new MiExcepcion("Ya existe otro registro para '" + habitoBase.getNombre() +
+                        "' con la meta " + meta + " " + unidad + ".");
             }
 
             habitoP.setFrecuencia(frecuencia);

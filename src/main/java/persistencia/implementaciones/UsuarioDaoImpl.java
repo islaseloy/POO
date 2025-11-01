@@ -25,6 +25,12 @@ public class UsuarioDaoImpl implements UsuarioDao {
         return instance;
     }
 
+   /**
+    * Guarda un nuevo objeto Usuario en la base de datos
+    *
+    * @param data El objeto Usuario a enviar. No debe ser nulo
+    * @throws MiExcepcion si el objeto 'data' es nulo o si falla la persistencia
+    * */
     @Override
     public void save(Usuario data) throws MiExcepcion {
         EntityManager em = emf.createEntityManager();

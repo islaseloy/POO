@@ -52,6 +52,12 @@ public class HabitoDaoImpl implements HabitoDao {
         }
     }
 
+    /**
+     * Modifica un objeto Habito existente en la base de datos
+     *
+     * @param data las modificaciones sobre el habito a sobreescribir. No debe ser nulo!
+     * @throws MiExcepcion si el objeto 'data' es nulo o si falla la persistencia
+     * */
     @Override
     public void update(Habito data) throws MiExcepcion {
         EntityManager em = emf.createEntityManager();

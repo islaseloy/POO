@@ -37,6 +37,14 @@ public class HabitoController {
         cargarDatosIniciales();
     }
 
+    /**
+     * Gestiona el evento de selección de un hábito personalizado en la tabla de la vista
+     *
+     * Este método es invocado cuando el usuario hace clic en una fila de la JTable
+     *
+     * Si no se selecciona ninguna fila o si el hábito no se encuentra, el método
+     * maneja la situación sin lanzar errores -> en su lugar manda un mensaje de error al usuario
+     */
     public void habitoPersonalizadoSeleccionado() {
         try {
             Integer idSeleccionado = vista.getIdHabitoPersonalizadoSeleccionado();

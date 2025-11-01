@@ -73,6 +73,11 @@ public class UsuarioController {
         }
     }
 
+    /**
+     * Guarda un objeto Usuario
+     *
+     * Obtiene los datos directamente de la vista (nombre,email,contraseña) y los envía al DAO
+     * */
     public void guardarUsuario() {
         try {
             String nombre = vista.getNombreUsuario();

@@ -94,6 +94,7 @@ public class VistaProgreso extends JFrame {
         tablaProgresos.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting() && tablaProgresos.getSelectedRow() != -1) {
                 // Cuando se selecciona una fila, le avisamos al controlador
+                System.out.println("DEBUG (Vista): Se ha seleccionado una fila. Avisando al controlador...");
                 controller.progresoSeleccionado();
             }
         });
@@ -192,7 +193,19 @@ public class VistaProgreso extends JFrame {
         textAreaObserv.setText("");
         textFieldLogro.setText("");
         comboBoxEstado.setSelectedIndex(0);
+        comboBoxHabito.setSelectedIndex(0);
         comboBoxUsuario.setSelectedIndex(0); //dispara el listener y limpiará/deshabilitará el combo de hábitos
         tablaProgresos.clearSelection();
+    }
+
+    //dios mio
+    public Integer getIdProgresoSeleccionadoDeTabla() {
+        int filaSeleccionada = tablaProgresos.getSelectedRow();
+
+        if (filaSeleccionada == -1) {
+            return null;
+        }
+
+        return (Integer) tablaProgresos.getModel().getValueAt(filaSeleccionada, 0);
     }
 }

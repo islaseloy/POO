@@ -114,6 +114,12 @@ public class HabitoPersonalizadoDaoImpl implements HabitoPersonalizadoDao {
         }
     }
 
+    /**
+     * Elimina un objeto HabitoPersonalizado existente en la base de datos
+     *
+     * @param id El id del objeto a eliminar mediante el cual lo va a buscar
+     * @throws MiExcepcion si el id es nulo o si falla la persistencia
+     * */
     @Override
     public void delete(Integer id) throws MiExcepcion {
         EntityManager em = emf.createEntityManager();

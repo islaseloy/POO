@@ -192,7 +192,7 @@ public class ProgresoController {
 
     public void progresoSeleccionado() {
         try {
-            Integer id = vista.getIdProgreso();
+            Integer id = vista.getIdProgresoSeleccionadoDeTabla();
             if (id == null) {
                 // esto pasa si se llama al limpiar, no es un error
                 return;
@@ -202,6 +202,7 @@ public class ProgresoController {
             if (p == null) {
                 throw new MiExcepcion("El progreso seleccionado ya no existe.");
             }
+
             //rellenar form
             vista.setFormulario(p);
 

@@ -64,6 +64,12 @@ public class ProgresoDaoImpl implements ProgresoDao {
         }
     }
 
+    /**
+     * Busca un objeto Progreso existente mediante el id
+     *
+     * @param id El id del objeto a buscar en la base de datos
+     * @return El objeto en sí, o nada.
+     * */
     @Override
     public Progreso findById(int id) throws MiExcepcion {
         EntityManager em = emf.createEntityManager();
@@ -74,6 +80,11 @@ public class ProgresoDaoImpl implements ProgresoDao {
         }
     }
 
+    /**
+     * Busca TODOS los objetos Progreso existentes.
+     *
+     * @return La lista de todos los objetos Progreso o una lista vacía
+     * */
     @Override
     public List<Progreso> findAll() throws MiExcepcion {
         EntityManager em = emf.createEntityManager();

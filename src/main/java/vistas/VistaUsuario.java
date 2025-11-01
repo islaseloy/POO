@@ -56,7 +56,9 @@ public class VistaUsuario extends JFrame{
 
         this.controller = new UsuarioController(this);
 
-        //El listener a continuación es para que al hacer click en una línea, se populen los textField, es medio complejo
+        /*
+        * Tal vez estaría bien mover esto al controler, porque encima es bastante complejo
+        * */
         tablaUsuarios.getSelectionModel().addListSelectionListener(e -> {
             // Estas dos líneas evitan que el evento se dispare múltiples veces y verifican que una fila esté seleccionada
             if (!e.getValueIsAdjusting() && tablaUsuarios.getSelectedRow() != -1) {

@@ -1,4 +1,3 @@
-// Archivo: entidades/HabitoPersonalizado.java
 package entidades;
 
 import javax.persistence.*;

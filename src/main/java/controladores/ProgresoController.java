@@ -39,40 +39,11 @@ public class ProgresoController {
     public void guardarProgreso() {
         try {
             HabitoPersonalizado habitoP = vista.getHabitoPersonalizadoSeleccionado();
-            String fechaStr = vista.getFechaRegistro();
-            String estado = vista.getEstadoSeleccionado();
-            String observaciones = vista.getObservaciones();
-            String logroStr = vista.getLogro();
-
             if (habitoP == null) {
                 throw new MiExcepcion("Debe seleccionar un Hábito para registrar el progreso.");
             }
-            if (fechaStr.trim().isEmpty()) {
-                throw new MiExcepcion("El campo 'Fecha registro' es obligatorio.");
-            }
-            if (logroStr.trim().isEmpty()) {
-                throw new MiExcepcion("El campo 'Logro' es obligatorio.");
-            }
 
-            Date fechaRegistro;
-            try {
-                fechaRegistro = new SimpleDateFormat("dd-MM-yyyy").parse(fechaStr);
-            } catch (ParseException e) {
-                throw new MiExcepcion("El formato de 'Fecha registro' es incorrecto. Use dd-MM-yyyy.");
-            }
-
-            Double logro;
-            try {
-                logro = Double.parseDouble(logroStr);
-            } catch (NumberFormatException e) {
-                throw new MiExcepcion("El valor en 'Logro' debe ser un número (ej: 12.5).");
-            }
-
-            Progreso nuevoProgreso = new Progreso();
-            nuevoProgreso.setFechaRegistro(fechaRegistro);
-            nuevoProgreso.setEstado(estado);
-            nuevoProgreso.setObservaciones(observaciones);
-            nuevoProgreso.setLogro(logro);
+            Progreso nuevoProgreso = traerDatosDeVista();
 
             nuevoProgreso.setHabitoPersonalizado(habitoP);
 
@@ -92,40 +63,31 @@ public class ProgresoController {
 
     public void editarProgreso() {
         try {
-            // 1. OBTENER ID
             Integer id = vista.getIdProgreso();
             if (id == null) {
-                throw new MiExcepcion("Debe seleccionar un progreso de la tabla para editar.");
+                throw new MiExcepcion("Debe seleccionar un registro de progreso de la tabla para poder editar.");
             }
-
-            HabitoPersonalizado habitoP = vista.getHabitoPersonalizadoSeleccionado();
-            String fechaStr = vista.getFechaRegistro();
-            String estado = vista.getEstadoSeleccionado();
-            String observaciones = vista.getObservaciones();
-            String logroStr = vista.getLogro();
-
-
-            if (habitoP == null) throw new MiExcepcion("Debe seleccionar un Hábito.");
-            if (fechaStr.trim().isEmpty()) throw new MiExcepcion("El campo 'Fecha registro' es obligatorio.");
-            if (logroStr.trim().isEmpty()) throw new MiExcepcion("El campo 'Logro' es obligatorio.");
-
-
-            Date fechaRegistro = dateFormat.parse(fechaStr);
-            Double logro = Double.parseDouble(logroStr);
 
             Progreso progresoAEditar = progresoDao.findById(id);
             if (progresoAEditar == null) {
-                throw new MiExcepcion("El progreso que intenta editar ya no existe.");
+                throw new MiExcepcion("El registro de progreso que intenta editar ya no existe.");
             }
 
-            progresoAEditar.setFechaRegistro(fechaRegistro);
-            progresoAEditar.setEstado(estado);
-            progresoAEditar.setObservaciones(observaciones);
-            progresoAEditar.setLogro(logro);
-            progresoAEditar.setHabitoPersonalizado(habitoP);
+            Progreso datosNuevos = traerDatosDeVista();
+
+            HabitoPersonalizado habitoPSeleccionado = vista.getHabitoPersonalizadoSeleccionado();
+            if (habitoPSeleccionado == null) {
+                throw new MiExcepcion("Debe seleccionar un Hábito.");
+            }
+
+            progresoAEditar.setFechaRegistro(datosNuevos.getFechaRegistro());
+            progresoAEditar.setEstado(datosNuevos.getEstado());
+            progresoAEditar.setObservaciones(datosNuevos.getObservaciones());
+            progresoAEditar.setLogro(datosNuevos.getLogro());
+
+            progresoAEditar.setHabitoPersonalizado(habitoPSeleccionado);
 
             progresoDao.update(progresoAEditar);
-
 
             vista.mostrarMensaje("Progreso actualizado con éxito.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
             refrescarTablaProgresos();
@@ -133,10 +95,6 @@ public class ProgresoController {
 
         } catch (MiExcepcion e) {
             vista.mostrarMensaje(e.getMessage(), "Error de Validación", JOptionPane.WARNING_MESSAGE);
-        } catch (ParseException e) {
-            vista.mostrarMensaje("El formato de 'Fecha registro' es incorrecto. Use dd-MM-yyyy.", "Error de Formato", JOptionPane.ERROR_MESSAGE);
-        } catch (NumberFormatException e) {
-            vista.mostrarMensaje("El valor en 'Logro' debe ser un número (ej: 12.5).", "Error de Formato", JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
             vista.mostrarMensaje("Ocurrió un error inesperado al editar: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
@@ -260,6 +218,42 @@ public class ProgresoController {
         } catch (MiExcepcion e) {
             vista.mostrarMensaje("Error al cargar el historial de progresos.", "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private Progreso traerDatosDeVista() throws MiExcepcion {
+        String fechaStr = vista.getFechaRegistro();
+        String estado = vista.getEstadoSeleccionado();
+        String observaciones = vista.getObservaciones();
+        String logroStr = vista.getLogro();
+
+        if (fechaStr.trim().isEmpty()) {
+            throw new MiExcepcion("El campo 'Fecha registro' es obligatorio.");
+        }
+        if (logroStr.trim().isEmpty()) {
+            throw new MiExcepcion("El campo 'Logro' es obligatorio.");
+        }
+
+        Date fechaRegistro;
+        try {
+            fechaRegistro = dateFormat.parse(fechaStr);
+        } catch (ParseException e) {
+            throw new MiExcepcion("El formato de 'Fecha registro' es incorrecto. Use dd-MM-yyyy.");
+        }
+
+        Double logro;
+        try {
+            logro = Double.parseDouble(logroStr);
+        } catch (NumberFormatException e) {
+            throw new MiExcepcion("El valor en 'Logro' debe ser un número (ej: 12.5).");
+        }
+
+        Progreso nuevoProgreso = new Progreso();
+        nuevoProgreso.setFechaRegistro(fechaRegistro);
+        nuevoProgreso.setEstado(estado);
+        nuevoProgreso.setObservaciones(observaciones);
+        nuevoProgreso.setLogro(logro);
+
+        return nuevoProgreso;
     }
 }
 

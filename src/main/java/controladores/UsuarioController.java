@@ -37,26 +37,10 @@ public class UsuarioController {
             model.addColumn("Nombre");
             model.addColumn("Email");
             model.addColumn("Hábitos");
+
             if (usuarios != null) {
                 for (Usuario u : usuarios) {
-
-                    //El StringBuilder es la forma más fácil de trabajar estas cosas
-                    StringBuilder habitosBuilder = new StringBuilder();
-
-                    List<HabitoPersonalizado> habitosPersonales = u.getHabitosPersonalizados();
-
-                    if (habitosPersonales != null && !habitosPersonales.isEmpty()) {
-                        for (int i = 0; i < habitosPersonales.size(); i++) {
-                            String nombreHabito = habitosPersonales.get(i).getHabitoBase().getNombre();
-                            habitosBuilder.append(nombreHabito);
-
-                            if (i < habitosPersonales.size() - 1) {
-                                habitosBuilder.append(", ");
-                            }
-                        }
-                    }
-
-                    String habitosStr = habitosBuilder.toString();
+                    String habitosStr = formatearHabitos(u.getHabitosPersonalizados());
 
                     model.addRow(new Object[]{
                             u.getId(),
@@ -116,20 +100,7 @@ public class UsuarioController {
                 throw new MiExcepcion("El usuario que intenta editar ya no existe.");
             }
 
-            String nombre = vista.getNombreUsuario();
-            String email = vista.getEmail();
-            String contrasena = vista.getContrasena();
-
-            if (nombre.trim().isEmpty() || email.trim().isEmpty()) {
-                throw new MiExcepcion("El nombre y el email no pueden quedar vacíos.");
-            }
-
-            usuarioAModificar.setNombreDeUsuario(nombre);
-            usuarioAModificar.setEmail(email);
-
-            if (!contrasena.trim().isEmpty()) {
-                usuarioAModificar.setContrasena(contrasena);
-            }
+            traerUsuarioDesdeVista(usuarioAModificar);
 
             dao.update(usuarioAModificar);
 
@@ -139,6 +110,8 @@ public class UsuarioController {
 
         } catch (MiExcepcion e) {
             vista.mostrarMensaje(e.getMessage(), "Error de Validación", JOptionPane.WARNING_MESSAGE);
+        } catch (NumberFormatException e) {
+            vista.mostrarMensaje("El ID del usuario no es válido.", "Error de Formato", JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
             vista.mostrarMensaje("Ocurrió un error al editar: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
@@ -175,6 +148,38 @@ public class UsuarioController {
             vista.mostrarMensaje(ex.getMessage(), "Error de Validación", JOptionPane.ERROR_MESSAGE);
         } catch (Exception ex) {
             vista.mostrarMensaje("Ocurrió un error inesperado al eliminar: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private String formatearHabitos(List<HabitoPersonalizado> habitos) {
+        if (habitos == null || habitos.isEmpty()) {
+            return "";
+        }
+
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < habitos.size(); i++) {
+            builder.append(habitos.get(i).getHabitoBase().getNombre());
+            if (i < habitos.size() - 1) {
+                builder.append(", ");
+            }
+        }
+        return builder.toString();
+    }
+
+    private void traerUsuarioDesdeVista(Usuario usuario) throws MiExcepcion {
+        String nombre = vista.getNombreUsuario();
+        String email = vista.getEmail();
+        String contrasena = vista.getContrasena();
+
+        if (nombre.trim().isEmpty() || email.trim().isEmpty()) {
+            throw new MiExcepcion("El nombre y el email no pueden quedar vacíos.");
+        }
+
+        usuario.setNombreDeUsuario(nombre);
+        usuario.setEmail(email);
+
+        if (!contrasena.trim().isEmpty()) {
+            usuario.setContrasena(contrasena);
         }
     }
 }

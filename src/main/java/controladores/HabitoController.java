@@ -119,34 +119,11 @@ public class HabitoController {
             Object itemCatalogoSeleccionado = vista.getItemHabitoSeleccionado();
             String descripcion = vista.getDescripcion();
             String tipo = vista.getTipo();
-
             Usuario usuario = vista.getUsuarioSeleccionado();
-            String frecuencia = vista.getFrecuencia();
-            String horario = vista.getHorario();
             String metaStr = vista.getMeta();
             String unidad = vista.getUnidad();
-            String fechaStr = vista.getFechaInicio();
 
-            Habito habitoBase;
-
-            if (itemCatalogoSeleccionado instanceof Habito) {
-                habitoBase = (Habito) itemCatalogoSeleccionado;
-            } else if (itemCatalogoSeleccionado instanceof String) {
-                String nombreHabitoEscrito = (String) itemCatalogoSeleccionado;
-                if (nombreHabitoEscrito.trim().isEmpty()) {
-                    throw new MiExcepcion("El campo 'Nombre' del hábito es obligatorio.");
-                }
-
-                habitoBase = habitoDao.getByName(nombreHabitoEscrito);
-
-                if (habitoBase == null) {
-                    habitoBase = new Habito(nombreHabitoEscrito, descripcion, tipo);
-                    habitoDao.save(habitoBase);
-                    vista.mostrarMensaje("Nuevo hábito '" + nombreHabitoEscrito + "' ha sido añadido al catálogo general.", "Catálogo Actualizado", JOptionPane.INFORMATION_MESSAGE);
-                }
-            } else {
-                throw new MiExcepcion("Debe seleccionar un hábito del catálogo o escribir el nombre de uno nuevo.");
-            }
+            Habito habitoBase = gestionarHabitoDelCatalogo(itemCatalogoSeleccionado, descripcion, tipo);
 
             if (usuario == null) {
                 throw new MiExcepcion("Debe seleccionar un 'Usuario Asociado'.");
@@ -154,35 +131,14 @@ public class HabitoController {
             if (metaStr.trim().isEmpty()) {
                 throw new MiExcepcion("El campo 'Meta' es obligatorio para personalizar un hábito.");
             }
-            if (fechaStr.trim().isEmpty()) {
-                throw new MiExcepcion("El campo 'Fecha de Inicio' es obligatorio.");
-            }
 
-            Double meta;
-            try {
-                meta = Double.parseDouble(metaStr);
-            } catch (NumberFormatException e) {
-                throw new MiExcepcion("El valor en 'Meta' debe ser un número válido (ej: 10.5).");
-            }
-
-            Date fechaInicio;
-            try {
-                fechaInicio = new SimpleDateFormat("dd-MM-yyyy").parse(fechaStr);
-            } catch (ParseException e) {
-                throw new MiExcepcion("El formato de 'Fecha de Inicio' es incorrecto. Por favor, use dd-MM-yyyy.");
-            }
-
-            if (habitoPersonalizadoDao.existe(usuario, habitoBase, meta)) {
+            Double metaParaVerificar = Double.parseDouble(metaStr);
+            if (habitoPersonalizadoDao.existe(usuario, habitoBase, metaParaVerificar)) {
                 throw new MiExcepcion("Este usuario ya tiene el hábito '" + habitoBase.getNombre() +
-                        "' registrado con la meta " + meta + " " + unidad + ".");
+                        "' registrado con la meta " + metaParaVerificar + " " + unidad + ".");
             }
 
-            HabitoPersonalizado nuevoHabitoP = new HabitoPersonalizado();
-            nuevoHabitoP.setFrecuencia(frecuencia);
-            nuevoHabitoP.setHorario(horario);
-            nuevoHabitoP.setMeta(meta);
-            nuevoHabitoP.setUnidad(unidad);
-            nuevoHabitoP.setFechaInicio(fechaInicio);
+            HabitoPersonalizado nuevoHabitoP = traerHabitoDesdeVista();
 
             nuevoHabitoP.setHabitoBase(habitoBase);
             nuevoHabitoP.setUsuario(usuario);
@@ -208,48 +164,23 @@ public class HabitoController {
             if (id == null) {
                 throw new MiExcepcion("Por favor, seleccione un hábito de la tabla para poder editar.");
             }
-
             HabitoPersonalizado habitoP = habitoPersonalizadoDao.findById(id);
             if (habitoP == null) {
                 throw new MiExcepcion("El hábito que intenta editar ya no existe o fue eliminado.");
             }
 
-            String frecuencia = vista.getFrecuencia();
-            String horario = vista.getHorario();
-            String metaStr = vista.getMeta();
-            String unidad = vista.getUnidad();
-            String fechaStr = vista.getFechaInicio();
+            HabitoPersonalizado datosNuevos = traerHabitoDesdeVista();
 
-            if (metaStr.trim().isEmpty() || fechaStr.trim().isEmpty()) {
-                throw new MiExcepcion("Los campos 'Meta' y 'Fecha de Inicio' no pueden quedar vacíos.");
+            if (habitoPersonalizadoDao.existeOtro(habitoP.getUsuario(), habitoP.getHabitoBase(), datosNuevos.getMeta(), id)) {
+                throw new MiExcepcion("Ya existe otro registro para '" + habitoP.getHabitoBase().getNombre() +
+                        "' con la meta " + datosNuevos.getMeta() + " " + datosNuevos.getUnidad() + ".");
             }
 
-            Double meta;
-            try {
-                meta = Double.parseDouble(metaStr);
-            } catch (NumberFormatException e) {
-                throw new MiExcepcion("El valor de 'Meta' debe ser un número (ej: 10.5).");
-            }
-
-            Date fechaInicio;
-            try {
-                fechaInicio = new SimpleDateFormat("dd-MM-yyyy").parse(fechaStr);
-            } catch (ParseException e) {
-                throw new MiExcepcion("El formato de 'Fecha de Inicio' es incorrecto. Use dd-MM-yyyy.");
-            }
-
-            Usuario usuario = habitoP.getUsuario();
-            Habito habitoBase = habitoP.getHabitoBase();
-            if (habitoPersonalizadoDao.existeOtro(usuario, habitoBase, meta, id)) {
-                throw new MiExcepcion("Ya existe otro registro para '" + habitoBase.getNombre() +
-                        "' con la meta " + meta + " " + unidad + ".");
-            }
-
-            habitoP.setFrecuencia(frecuencia);
-            habitoP.setHorario(horario);
-            habitoP.setMeta(meta);
-            habitoP.setUnidad(unidad);
-            habitoP.setFechaInicio(fechaInicio);
+            habitoP.setFrecuencia(datosNuevos.getFrecuencia());
+            habitoP.setHorario(datosNuevos.getHorario());
+            habitoP.setMeta(datosNuevos.getMeta());
+            habitoP.setUnidad(datosNuevos.getUnidad());
+            habitoP.setFechaInicio(datosNuevos.getFechaInicio());
 
             habitoPersonalizadoDao.update(habitoP);
 
@@ -332,6 +263,66 @@ public class HabitoController {
         } catch (MiExcepcion e) {
             vista.mostrarMensaje("Error fatal: no se pudo cargar el catálogo de hábitos.", "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private Habito gestionarHabitoDelCatalogo(Object itemCatalogoSeleccionado, String descripcion, String tipo) throws MiExcepcion {
+        Habito habitoBase;
+
+        if (itemCatalogoSeleccionado instanceof Habito) {
+            habitoBase = (Habito) itemCatalogoSeleccionado;
+        } else if (itemCatalogoSeleccionado instanceof String) {
+            String nombreHabitoEscrito = (String) itemCatalogoSeleccionado;
+            if (nombreHabitoEscrito.trim().isEmpty()) {
+                throw new MiExcepcion("El campo 'Nombre' del hábito es obligatorio.");
+            }
+
+            habitoBase = habitoDao.getByName(nombreHabitoEscrito);
+
+            if (habitoBase == null) {
+                habitoBase = new Habito(nombreHabitoEscrito, descripcion, tipo);
+                habitoDao.save(habitoBase);
+                vista.mostrarMensaje("Nuevo hábito '" + nombreHabitoEscrito + "' ha sido añadido al catálogo general.", "Catálogo Actualizado", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } else {
+            throw new MiExcepcion("Debe seleccionar un hábito del catálogo o escribir el nombre de uno nuevo.");
+        }
+
+        return habitoBase;
+    }
+
+    private HabitoPersonalizado traerHabitoDesdeVista() throws MiExcepcion {
+        String frecuencia = vista.getFrecuencia();
+        String horario = vista.getHorario();
+        String metaStr = vista.getMeta();
+        String unidad = vista.getUnidad();
+        String fechaStr = vista.getFechaInicio();
+
+        if (fechaStr.trim().isEmpty()) {
+            throw new MiExcepcion("El campo 'Fecha de Inicio' es obligatorio.");
+        }
+
+        Double meta;
+        try {
+            meta = Double.parseDouble(metaStr);
+        } catch (NumberFormatException e) {
+            throw new MiExcepcion("El valor en 'Meta' debe ser un número válido (ej: 10.5).");
+        }
+
+        Date fechaInicio;
+        try {
+            fechaInicio = new SimpleDateFormat("dd-MM-yyyy").parse(fechaStr);
+        } catch (ParseException e) {
+            throw new MiExcepcion("El formato de 'Fecha de Inicio' es incorrecto. Use dd-MM-yyyy.");
+        }
+
+        HabitoPersonalizado nuevoHabitoP = new HabitoPersonalizado();
+        nuevoHabitoP.setFrecuencia(frecuencia);
+        nuevoHabitoP.setHorario(horario);
+        nuevoHabitoP.setMeta(meta);
+        nuevoHabitoP.setUnidad(unidad);
+        nuevoHabitoP.setFechaInicio(fechaInicio);
+
+        return nuevoHabitoP;
     }
 
 }
